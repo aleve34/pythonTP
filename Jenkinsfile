@@ -6,7 +6,10 @@ pipeline {
         DOCKERFILE_PATH = './'
         TEST_FILE_PATH = './test_variables.txt'
     }
-    stages {
-        ...
+stage('Build') {
+    steps {
+        script {
+            bat 'docker build -t sum-image .'
+        }
     }
-}
+}}
