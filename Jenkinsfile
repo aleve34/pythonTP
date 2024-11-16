@@ -15,5 +15,15 @@ pipeline {
             }
         }
     }
+    stage('Run') {
+    steps {
+        script {
+            def output = bat(script: 'docker run -d sum-image', returnStdout: true).trim()
+            def lines = output.split('\n')
+            CONTAINER_ID = lines[-1].trim()
+            echo "Conteneur lancé avec l'ID : ${CONTAINER_ID}"
+        }
+    }
+}
 }
 
