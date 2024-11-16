@@ -6,3 +6,4 @@ pipeline {
         DOCKERFILE_PATH = './'
         TEST_FILE_PATH = './test_variables.txt'
     }
+}
