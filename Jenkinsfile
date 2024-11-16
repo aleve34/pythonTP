@@ -10,20 +10,19 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    bat 'docker build -t sum-image .'
+                    bat 'docker build -t sum-image .' // Construire l'image Docker
+                }
+            }
+        }
+        stage('Run') { // Étape Run incluse correctement dans "stages"
+            steps {
+                script {
+                    def output = bat(script: 'docker run -d sum-image', returnStdout: true).trim()
+                    def lines = output.split('\n')
+                    CONTAINER_ID = lines[-1].trim()
+                    echo "Conteneur lancé avec l'ID : ${CONTAINER_ID}"
                 }
             }
         }
     }
-    stage('Run') {
-    steps {
-        script {
-            def output = bat(script: 'docker run -d sum-image', returnStdout: true).trim()
-            def lines = output.split('\n')
-            CONTAINER_ID = lines[-1].trim()
-            echo "Conteneur lancé avec l'ID : ${CONTAINER_ID}"
-        }
-    }
-}
-}
 
