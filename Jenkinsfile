@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         CONTAINER_ID = ''
-        SUM_PY_PATH = '/app/sum.py'  // Adjusted to the correct path
+        SUM_PY_PATH = '/app/sum.py'
         DOCKERFILE_PATH = './'
         TEST_FILE_PATH = './test_variables.txt'
     }
@@ -38,10 +38,10 @@ pipeline {
                         def arg2 = vars[1]
                         def expectedSum = vars[2].toFloat()
 
-                        // Execute the Python script inside the container
-                        def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim().split('\n')[0]
+                        // Execute the Python script inside the container and capture the output
+                        def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim()
 
-                        // Check the result
+                        // Check if the output is a valid number
                         try {
                             def result = output.toFloat()
                             if (result == expectedSum) {
@@ -50,7 +50,7 @@ pipeline {
                                 error "Test échoué pour ${arg1} + ${arg2}. Résultat attendu : ${expectedSum}, obtenu : ${result}"
                             }
                         } catch (Exception e) {
-                            error "Erreur de conversion du résultat pour ${arg1} + ${arg2}. Erreur : ${e.message}"
+                            error "Erreur de conversion du résultat pour ${arg1} + ${arg2}. Erreur : ${e.message}. Résultat obtenu : ${output}"
                         }
                     }
                 }
