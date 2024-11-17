@@ -31,7 +31,7 @@ pipeline {
             steps {
                 script {
                     // Lecture du fichier de test
-                    def testLines = readFile(TEST_FILE_PATH).split('\n')
+                    def testLines = readFile(./test_variable.txt).split('\n')
                     for (line in testLines) {
                         def vars = line.split(' ')
                         def arg1 = vars[0]
@@ -50,6 +50,18 @@ pipeline {
                             error "Test échoué pour ${arg1} + ${arg2}. Résultat attendu : ${expectedSum}, obtenu : ${result}"
                         }
                     }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                // Nettoyer le conteneur après le pipeline
+                if (CONTAINER_ID) {
+                    bat "docker stop ${CONTAINER_ID}"
+                    bat "docker rm ${CONTAINER_ID}"
+                    echo "Conteneur ${CONTAINER_ID} arrêté et supprimé."
                 }
             }
         }
