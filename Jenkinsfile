@@ -10,16 +10,19 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    bat 'docker build -t sum-image .' 
+                    bat 'docker build -t sum-image .' // Construire l'image Docker
                 }
             }
         }
         stage('Run') {
             steps {
                 script {
-                    def output = bat(script: 'docker run -d sum-image', returnStdout: true).trim()
-                    def lines = output.split('\n')
-                    CONTAINER_ID = lines[-1].trim()
+                    // Nettoyer les conteneurs existants
+                    bat 'docker rm -f sum-container || true'
+                    
+                    // Lancer un conteneur actif
+                    def output = bat(script: 'docker run -d --name sum-container sum-image tail -f /dev/null', returnStdout: true).trim()
+                    CONTAINER_ID = output.split('\n')[-1].trim()
                     echo "Conteneur lancé avec l'ID : ${CONTAINER_ID}"
                 }
             }
@@ -27,6 +30,7 @@ pipeline {
         stage('Test') {
             steps {
                 script {
+                    // Lecture du fichier de test
                     def testLines = readFile(TEST_FILE_PATH).split('\n')
                     for (line in testLines) {
                         def vars = line.split(' ')
@@ -34,11 +38,11 @@ pipeline {
                         def arg2 = vars[1]
                         def expectedSum = vars[2].toFloat()
 
-                        
+                        // Exécuter le script Python dans le conteneur
                         def output = bat(script: "docker exec ${CONTAINER_ID} python /app/sum.py ${arg1} ${arg2}", returnStdout: true).trim()
 
+                        // Vérifier le résultat
                         def result = output.toFloat()
-                        
                         if (result == expectedSum) {
                             echo "Test réussi pour ${arg1} + ${arg2} = ${expectedSum}"
                         } else {
@@ -49,5 +53,16 @@ pipeline {
             }
         }
     }
-
+    post {
+        always {
+            script {
+                // Nettoyer le conteneur après le pipeline
+                if (CONTAINER_ID) {
+                    bat "docker stop ${CONTAINER_ID}"
+                    bat "docker rm ${CONTAINER_ID}"
+                    echo "Conteneur ${CONTAINER_ID} arrêté et supprimé."
+                }
+            }
+        }
+    }
 }
