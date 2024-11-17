@@ -1,11 +1,23 @@
-# Utiliser l'image officielle Python
+# Start with a Python base image
 FROM python:3.13.0-alpine3.20
 
-# Créer un répertoire pour l'application
+# Install Sphinx and any other required dependencies for your Python script
+RUN pip install sphinx
+
+# Install any dependencies needed for the Python script (e.g., numpy, requests, etc.)
+RUN pip install --no-cache-dir some-package
+
+# Set up the working directory for the application
 WORKDIR /app
 
-# Copier le script sum.py dans le répertoire /app du conteneur
-COPY sum.py /app
+# Copy the sum.py script into the container
+COPY sum.py /app/
 
-# Définir une commande par défaut pour maintenir le conteneur actif
-CMD ["python", "/app/sum.py"]
+# Create a directory for the Sphinx documentation
+COPY ./docs /app/docs
+
+# Set the working directory to where the sum.py script and docs are located
+WORKDIR /app
+
+# Optionally, run Sphinx to initialize the documentation (you can do this in Jenkins too)
+# RUN sphinx-quickstart /app/docs

@@ -47,13 +47,30 @@ pipeline {
                 }
             }
         }
+        stage('Performance Monitoring') {
+            steps {
+                script {
+                   
+                    def stats = bat(script: "docker stats --no-stream ${CONTAINER_ID}", returnStdout: true).trim()
+                    echo "Performances du conteneur ${CONTAINER_ID} : \n${stats}"
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 script {
-                    // Docker login using environment variables
                     bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
                     bat "docker tag sum-image ${DOCKER_USERNAME}/sum-image:latest"
                     bat "docker push ${DOCKER_USERNAME}/sum-image:latest"
+                }
+            }
+        }
+        stage('Documentation') {
+            steps {
+                script {
+                    bat 'sphinx-build -b html /app/docs/source /app/docs/build'
+
+                    archiveArtifacts artifacts: '/app/docs/build/html/**', allowEmptyArchive: true
                 }
             }
         }
