@@ -7,6 +7,8 @@ pipeline {
         TEST_FILE_PATH = './test_variables.txt'
         DOCKER_USERNAME = 'sirine3443'   // Docker Hub username
         DOCKER_PASSWORD = '0123.0123'   // Docker Hub password
+        SPHINX_SOURCE = '/app/docs/source' // Source directory for Sphinx
+        SPHINX_BUILD_DIR = '/app/docs/build' // Build output directory for Sphinx
     }
     stages {
         stage('Build') {
@@ -50,7 +52,6 @@ pipeline {
         stage('Performance Monitoring') {
             steps {
                 script {
-                   
                     def stats = bat(script: "docker stats --no-stream ${CONTAINER_ID}", returnStdout: true).trim()
                     echo "Performances du conteneur ${CONTAINER_ID} : \n${stats}"
                 }
@@ -68,9 +69,11 @@ pipeline {
         stage('Documentation') {
             steps {
                 script {
-                    bat 'sphinx-build -b html /app/docs/source /app/docs/build'
+                    // Run sphinx-build to generate HTML documentation
+                    bat "docker exec ${CONTAINER_ID} sphinx-build -b html ${SPHINX_SOURCE} ${SPHINX_BUILD_DIR}"
 
-                    archiveArtifacts artifacts: '/app/docs/build/html/**', allowEmptyArchive: true
+                    // Archive the generated HTML files as artifacts
+                    archiveArtifacts artifacts: "${SPHINX_BUILD_DIR}/**/*.html", allowEmptyArchive: true
                 }
             }
         }
