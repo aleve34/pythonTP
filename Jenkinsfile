@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         CONTAINER_ID = ''
-        SUM_PY_PATH = './app/sum.py'
+        SUM_PY_PATH = '/app/sum.py'  // Adjusted to the correct path
         DOCKERFILE_PATH = './'
         TEST_FILE_PATH = './test_variables.txt'
     }
