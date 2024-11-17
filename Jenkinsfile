@@ -4,9 +4,9 @@ pipeline {
         CONTAINER_ID = ''
         SUM_PY_PATH = './app/sum.py'
         DOCKERFILE_PATH = './'
-        TEST_FILE_PATH = './test_variables.txt' // Make sure this path is correct
+        TEST_FILE_PATH = './test_variables.txt'
     }
-    stages { 
+    stages {
         stage('Build') {
             steps {
                 script {
@@ -22,7 +22,7 @@ pipeline {
                     
                     // Run a new container in the background
                     def output = bat(script: 'docker run -d --name sum-container sum-image tail -f /dev/null', returnStdout: true).trim()
-                    CONTAINER_ID = output
+                    CONTAINER_ID = output.split('\n')[-1].trim()
                     echo "Conteneur lancé avec l'ID : ${CONTAINER_ID}"
                 }
             }
@@ -30,7 +30,7 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Read test data from the file
+                    // Read the test data from the file
                     def testLines = readFile(TEST_FILE_PATH).split('\n')
                     for (line in testLines) {
                         def vars = line.split(' ')
@@ -38,7 +38,7 @@ pipeline {
                         def arg2 = vars[1]
                         def expectedSum = vars[2].toFloat()
 
-                        // Execute the Python script in the container
+                        // Execute the Python script inside the container
                         def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim().split('\n')[0]
 
                         // Check the result
