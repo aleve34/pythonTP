@@ -10,17 +10,15 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    bat 'docker build -t sum-image .' // Build the Docker image
+                    bat 'docker build -t sum-image .' 
                 }
             }
         }
         stage('Run') {
             steps {
                 script {
-                    // Clean up existing containers
-                    bat 'docker rm -f sum-container || true'
                     
-                    // Run a new container in the background
+                    bat 'docker rm -f sum-container || true'
                     def output = bat(script: 'docker run -d --name sum-container sum-image tail -f /dev/null', returnStdout: true).trim()
                     CONTAINER_ID = output.split('\n')[-1].trim()
                     echo "Conteneur lancé avec l'ID : ${CONTAINER_ID}"
@@ -30,7 +28,7 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Read the test data from the file
+                    
                     def testLines = readFile(TEST_FILE_PATH).split('\n')
                     for (line in testLines) {
                         def vars = line.split(' ')
@@ -38,13 +36,10 @@ pipeline {
                         def arg2 = vars[1]
                         def expectedSum = vars[2].toFloat()
 
-                        // Execute the Python script inside the container and capture the output
+                        
                         def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim()
 
-                        // Extract just the result (the sum) from the output, removing any leading command parts
-                        def result = output.tokenize().last().toFloat() // This assumes the sum is the last token in the output
-
-                        // Ensure the result is as expected
+                        def result = output.tokenize().last().toFloat() 
                         if (result == expectedSum) {
                             echo "Test réussi pour ${arg1} + ${arg2} = ${expectedSum}"
                         } else {
@@ -55,10 +50,19 @@ pipeline {
             }
         }
     }
+	stage('Deploy') {
+    		steps {
+        	script {
+            		bat 'docker login -u sirine3443 -p 0123.0123'
+            		bat 'docker tag sum-image sirine3443/sum-image:latest'
+            		bat 'docker push sirine3443/sum-image:latest'
+        }
+    }
+}
+
     post {
         always {
             script {
-                // Clean up the container after the pipeline
                 if (CONTAINER_ID) {
                     bat "docker stop ${CONTAINER_ID}"
                     bat "docker rm ${CONTAINER_ID}"
