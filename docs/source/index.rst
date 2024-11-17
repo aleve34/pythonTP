@@ -13,7 +13,5 @@ Contents:
    usage
    api
 
-Installation
-------------
-To install the Sum Project, clone the repository and install the required dependencies:
+
 

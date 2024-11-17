@@ -69,10 +69,8 @@ pipeline {
         stage('Documentation') {
             steps {
                 script {
-                    // Run sphinx-build to generate HTML documentation
                     bat "docker exec ${CONTAINER_ID} sphinx-build -b html ${SPHINX_SOURCE} ${SPHINX_BUILD_DIR}"
 
-                    // Archive the generated HTML files as artifacts
                     archiveArtifacts artifacts: "${SPHINX_BUILD_DIR}/**/*.html", allowEmptyArchive: true
                 }
             }
