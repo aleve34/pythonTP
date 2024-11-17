@@ -39,7 +39,8 @@ pipeline {
                         def expectedSum = vars[2].toFloat()
 
                         // Exécuter le script Python dans le conteneur
-                        def output = bat(script: "docker exec ${CONTAINER_ID} python /app/sum.py ${arg1} ${arg2}", returnStdout: true).trim()
+                        def output = bat(script: "docker exec ${CONTAINER_ID} python /app/sum.py ${arg1} ${arg2}", returnStdout: true).trim().split('\n')[0]
+
 
                         // Vérifier le résultat
                         def result = output.toFloat()
