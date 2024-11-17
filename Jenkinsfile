@@ -5,6 +5,8 @@ pipeline {
         SUM_PY_PATH = '/app/sum.py'
         DOCKERFILE_PATH = './'
         TEST_FILE_PATH = './test_variables.txt'
+        DOCKER_USERNAME = 'sirine3443'   // Docker Hub username
+        DOCKER_PASSWORD = '0123.0123'   // Docker Hub password
     }
     stages {
         stage('Build') {
@@ -17,7 +19,6 @@ pipeline {
         stage('Run') {
             steps {
                 script {
-                    
                     bat 'docker rm -f sum-container || true'
                     def output = bat(script: 'docker run -d --name sum-container sum-image tail -f /dev/null', returnStdout: true).trim()
                     CONTAINER_ID = output.split('\n')[-1].trim()
@@ -28,7 +29,6 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    
                     def testLines = readFile(TEST_FILE_PATH).split('\n')
                     for (line in testLines) {
                         def vars = line.split(' ')
@@ -36,9 +36,7 @@ pipeline {
                         def arg2 = vars[1]
                         def expectedSum = vars[2].toFloat()
 
-                        
                         def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim()
-
                         def result = output.tokenize().last().toFloat() 
                         if (result == expectedSum) {
                             echo "Test réussi pour ${arg1} + ${arg2} = ${expectedSum}"
@@ -49,17 +47,17 @@ pipeline {
                 }
             }
         }
-    }
-	stage('Deploy') {
-    		steps {
-        	script {
-            		bat 'docker login -u sirine3443 -p 0123.0123'
-            		bat 'docker tag sum-image sirine3443/sum-image:latest'
-            		bat 'docker push sirine3443/sum-image:latest'
+        stage('Deploy') {
+            steps {
+                script {
+                    // Docker login using environment variables
+                    bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    bat "docker tag sum-image ${DOCKER_USERNAME}/sum-image:latest"
+                    bat "docker push ${DOCKER_USERNAME}/sum-image:latest"
+                }
+            }
         }
     }
-}
-
     post {
         always {
             script {
