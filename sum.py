@@ -1,3 +1,5 @@
+import sys
+
 def additionner(arg1, arg2):
     """
     Additionne deux nombres et retourne le résultat.
@@ -10,11 +12,23 @@ def additionner(arg1, arg2):
 
 def main():
     """
-    Fonction principale qui appelle 'additionner' avec des valeurs d'exemple.
+    Fonction principale qui lit les arguments de la ligne de commande et les passe à 'additionner'.
     Elle affiche également le résultat dans la console.
     """
-    result = additionner(5, 10)
-    print(f"Le résultat de l'addition est : {result}")
+    # Vérifier si le bon nombre d'arguments a été passé
+    if len(sys.argv) != 3:
+        print("Usage: python sum.py <arg1> <arg2>")
+        sys.exit(1)
     
+    # Récupérer les arguments de la ligne de commande et les convertir en float
+    arg1 = float(sys.argv[1])
+    arg2 = float(sys.argv[2])
+
+    # Calculer la somme
+    result = additionner(arg1, arg2)
+
+    # Afficher le résultat
+    print(result)
+
 if __name__ == '__main__':
     main()
