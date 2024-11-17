@@ -41,16 +41,14 @@ pipeline {
                         // Execute the Python script inside the container and capture the output
                         def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim()
 
-                        // Ensure the output is numeric (float or integer)
-                        try {
-                            def result = output.toFloat() // This should give you the sum as a number
-                            if (result == expectedSum) {
-                                echo "Test réussi pour ${arg1} + ${arg2} = ${expectedSum}"
-                            } else {
-                                error "Test échoué pour ${arg1} + ${arg2}. Résultat attendu : ${expectedSum}, obtenu : ${result}"
-                            }
-                        } catch (Exception e) {
-                            error "Erreur de conversion du résultat pour ${arg1} + ${arg2}. Erreur : ${e.message}. Résultat obtenu : ${output}"
+                        // Extract just the result (the sum) from the output, removing any leading command parts
+                        def result = output.tokenize().last().toFloat() // This assumes the sum is the last token in the output
+
+                        // Ensure the result is as expected
+                        if (result == expectedSum) {
+                            echo "Test réussi pour ${arg1} + ${arg2} = ${expectedSum}"
+                        } else {
+                            error "Test échoué pour ${arg1} + ${arg2}. Résultat attendu : ${expectedSum}, obtenu : ${result}"
                         }
                     }
                 }
