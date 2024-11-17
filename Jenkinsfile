@@ -54,16 +54,4 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            script {
-                // Nettoyer le conteneur après le pipeline
-                if (CONTAINER_ID) {
-                    bat "docker stop ${CONTAINER_ID}"
-                    bat "docker rm ${CONTAINER_ID}"
-                    echo "Conteneur ${CONTAINER_ID} arrêté et supprimé."
-                }
-            }
-        }
-    }
 }
