@@ -41,9 +41,9 @@ pipeline {
                         // Execute the Python script inside the container and capture the output
                         def output = bat(script: "docker exec ${CONTAINER_ID} python ${SUM_PY_PATH} ${arg1} ${arg2}", returnStdout: true).trim()
 
-                        // Check if the output is a valid number
+                        // Ensure the output is numeric (float or integer)
                         try {
-                            def result = output.toFloat()
+                            def result = output.toFloat() // This should give you the sum as a number
                             if (result == expectedSum) {
                                 echo "Test réussi pour ${arg1} + ${arg2} = ${expectedSum}"
                             } else {
